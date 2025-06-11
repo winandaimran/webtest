@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape Room: Keamanan Digital</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a192f;
+            color: #e6f1ff;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .game-container {
+            background-color: #172a45;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            color: #64ffda;
+            text-align: center;
+            border-bottom: 1px solid #64ffda;
+            padding-bottom: 10px;
+        }
+        
+        .scene {
+            display: none;
+            min-height: 300px;
+        }
+        
+        .scene.active {
+            display: block;
+        }
+        
+        .scene-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .options {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: left;
+        }
+        
+        button:hover {
+            background-color: #1e40af;
+        }
+        
+        .password-checker {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #1e2a3a;
+            border-radius: 5px;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #1e2a3a;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #64ffda;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .strength-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .strength-category {
+            font-size: 0.8em;
+            color: #94a3b8;
+        }
+        
+        .strength-category.active {
+            color: #64ffda;
+            font-weight: bold;
+        }
+        
+        .inventory {
+            background-color: #1e2a3a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .inventory h3 {
+            margin-top: 0;
+            color: #64ffda;
+        }
+        
+        .inventory-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .inventory-item {
+            background-color: #0f172a;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #14532d;
+            color: #bbf7d0;
+            display: block;
+        }
+        
+        .error {
+            background-color: #7f1d1d;
+            color: #fecaca;
+            display: block;
+        }
+        
+        .hint {
+            background-color: #1e3a8a;
+            color: #bfdbfe;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            display: none;
+        }
+        
+        .hint-button {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.9em;
+        }
+        
+        .terminal {
+            background-color: #0f172a;
+            color: #84cc16;
+            font-family: monospace;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            height: 150px;
+            overflow-y: auto;
+        }
+        
+        .terminal-line {
+            margin: 5px 0;
+        }
+        
+        .terminal-input {
+            display: flex;
+        }
+        
+        .terminal-prompt {
+            color: #84cc16;
+            margin-right: 5px;
+        }
+        
+        #terminal-command {
+            background: transparent;
+            border: none;
+            color: #84cc16;
+            font-family: monospace;
+            width: 100%;
+            outline: none;
+        }
+        
+        .developer-credit {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+        
+        .wifi-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .wifi-option {
+            background-color: #1e2a3a;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .wifi-option:hover {
+            background-color: #1e3a8a;
+        }
+        
+        .wifi-option.selected {
+            background-color: #14532d;
+            border: 1px solid #64ffda;
+        }
+        
+        .wifi-ssid {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .wifi-details {
+            font-size: 0.8em;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Escape Room: Keamanan Digital</h1>
+        
+        <div id="intro" class="scene active">
+            <p>Anda terbangun di sebuah ruangan virtual yang terkunci. Sebuah pesan muncul di layar:</p>
+            <p><em>"Untuk keluar dari ruangan ini, Anda harus membuktikan pengetahuan Anda tentang keamanan digital. Setiap tantangan yang Anda selesaikan akan membawa Anda lebih dekat ke pintu keluar. Waspadalah - bahaya digital mengintai di setiap sudut!"</em></p>
+	   
+            <div class="options">
+                <button onclick="startGame()">Mulai Permainan</button>
+            </div>
+        </div>
+        
+        <div id="scene1" class="scene">
+            <h2>Ruangan 1: Kunci Digital</h2>
+            <img src="https://img.icons8.com/fluency/96/000000/lock--v1.png" class="scene-image" alt="Gembok digital">
+            <p>Di depan Anda ada pintu terkunci dengan panel digital. Untuk membukanya, Anda harus membuat password yang kuat.</p>
+            
+            <div class="password-checker">
+                <h3>Buat Password yang Kuat:</h3>
+                <input type="password" id="password-input" oninput="checkPasswordStrength()" placeholder="Masukkan password...">
+                <div class="progress-bar">
+                    <div class="progress" id="password-strength"></div>
+                </div>
+                <div class="strength-indicator">
+                    <span class="strength-category" id="weak">Lemah</span>
+                    <span class="strength-category" id="medium">Sedang</span>
+                    <span class="strength-category" id="strong">Kuat</span>
+                    <span class="strength-category" id="very-strong">Sangat Kuat</span>
+                </div>
+                <div id="password-hint" class="hint">
+                    <p>Password yang kuat harus memiliki:</p>
+                    <ul>
+                        <li>Minimal 12 karakter</li>
+                        <li>Kombinasi huruf besar dan kecil</li>
+                        <li>Angka</li>
+                        <li>Simbol khusus</li>
+                        <li>Bukan kata yang ada di kamus</li>
+                    </ul>
+                </div>
+                <button class="hint-button" onclick="toggleHint('password-hint')">Butuh petunjuk?</button>
+            </div>
+            
+            <div id="password-message" class="message"></div>
+            
+            <div class="options">
+                <button id="unlock-door" disabled onclick="solvePassword()">Buka Pintu</button>
+            </div>
+        </div>
+        
+        <div id="scene2" class="scene">
+            <h2>Ruangan 2: Deteksi Phishing</h2>
+            <img src="https://img.icons8.com/color/96/000000/phishing.png" class="scene-image" alt="Email phishing">
+            <p>Anda masuk ke ruangan berikutnya. Sebuah layar menampilkan beberapa email. Identifikasi mana yang merupakan upaya phishing!</p>
+            
+            <div class="terminal">
+                <div class="terminal-line">Email 1: "Pemberitahuan penting dari bank Anda - klik di sini untuk verifikasi akun"</div>
+                <div class="terminal-line">Email 2: "Tagihan bulanan Anda tersedia - login ke akun Anda untuk melihat detail"</div>
+                <div class="terminal-line">Email 3: "Anda memenangkan hadiah! Klaim sekarang sebelum kedaluwarsa"</div>
+                <div class="terminal-line">Email 4: "Pembaruan keamanan untuk layanan Anda - harap konfirmasi detail Anda"</div>
+            </div>
+            
+            <p>Email mana yang merupakan upaya phishing? (Pilih semua yang sesuai)</p>
+            
+            <div class="options">
+                <button onclick="checkPhishingAnswer([1,3,4])">1, 3, 4</button>
+                <button onclick="checkPhishingAnswer([1,3])">1, 3</button>
+                <button onclick="checkPhishingAnswer([1,2,3])">1, 2, 3</button>
+                <button onclick="checkPhishingAnswer([3,4])">3, 4</button>
+            </div>
+            
+            <div id="phishing-hint" class="hint">
+                <p>Ciri-ciri email phishing:</p>
+                <ul>
+                    <li>Meminta informasi sensitif</li>
+                    <li>Menggunakan rasa urgensi</li>
+                    <li>Menawarkan hadiah yang tidak terduga</li>
+                    <li>Alamat pengirim yang mencurigakan</li>
+                    <li>Tautan atau lampiran yang tidak jelas</li>
+                </ul>
+            </div>
+            <button class="hint-button" onclick="toggleHint('phishing-hint')">Butuh petunjuk?</button>
+            
+            <div id="phishing-message" class="message"></div>
+        </div>
+        
+        <div id="scene3" class="scene">
+            <h2>Ruangan 3: Malware Detection</h2>
+            <img src="https://img.icons8.com/color/96/000000/computer-virus.png" class="scene-image" alt="Virus komputer">
+            <p>Di ruangan ini, Anda harus mengidentifikasi file yang berpotensi berbahaya dari daftar berikut:</p>
+            
+            <div class="terminal">
+                <div class="terminal-line">File 1: laporan_keuangan.pdf</div>
+                <div class="terminal-line">File 2: invoice.exe</div>
+                <div class="terminal-line">File 3: foto_keluarga.jpg</div>
+                <div class="terminal-line">File 4: dokumen_penting.docx</div>
+                <div class="terminal-line">File 5: screensaver.scr</div>
+            </div>
+            
+            <p>File mana yang paling berpotensi berbahaya? (Pilih semua yang sesuai)</p>
+            
+            <div class="options">
+                <button onclick="checkMalwareAnswer([2,5])">2, 5</button>
+                <button onclick="checkMalwareAnswer([2])">2</button>
+                <button onclick="checkMalwareAnswer([1,2,5])">1, 2, 5</button>
+                <button onclick="checkMalwareAnswer([5])">5</button>
+            </div>
+            
+            <div id="malware-hint" class="hint">
+                <p>File yang berpotensi berbahaya:</p>
+                <ul>
+                    <li>File executable (.exe, .bat, .scr, dll) dari sumber tidak dikenal</li>
+                    <li>File dengan ekstensi ganda (seperti .pdf.exe)</li>
+                    <li>File yang meminta izin administrator tanpa alasan jelas</li>
+                    <li>File dari sumber yang tidak tepercaya</li>
+                </ul>
+            </div>
+            <button class="hint-button" onclick="toggleHint('malware-hint')">Butuh petunjuk?</button>
+            
+            <div id="malware-message" class="message"></div>
+        </div>
+        
+        <div id="scene4" class="scene">
+            <h2>Ruangan 4: Keamanan Jaringan WiFi</h2>
+            <img src="https://img.icons8.com/fluency/96/000000/wifi.png" class="scene-image" alt="Jaringan WiFi">
+            <p>Anda menemukan beberapa jaringan WiFi yang tersedia. Pilih jaringan yang paling aman untuk terhubung:</p>
+            
+            <div class="wifi-options" id="wifi-options">
+                <div class="wifi-option" onclick="selectWifi(this, 'wifi1')">
+                    <div class="wifi-ssid">Cafe_Gratis</div>
+                    <div class="wifi-details">Tidak ada password • Banyak pengguna</div>
+                </div>
+                <div class="wifi-option" onclick="selectWifi(this, 'wifi2')">
+                    <div class="wifi-ssid">Home-Net</div>
+                    <div class="wifi-details">WPA2 • Password pribadi</div>
+                </div>
+                <div class="wifi-option" onclick="selectWifi(this, 'wifi3')">
+                    <div class="wifi-ssid">Hotel_Guest</div>
+                    <div class="wifi-details">Portal login • Tidak dienkripsi</div>
+                </div>
+                <div class="wifi-option" onclick="selectWifi(this, 'wifi4')">
+                    <div class="wifi-ssid">Free_Public_WiFi</div>
+                    <div class="wifi-details">Terbuka • Tidak aman</div>
+                </div>
+            </div>
+            
+            <div class="options">
+                <button id="connect-wifi" disabled onclick="checkWifiAnswer()">Hubungkan</button>
+            </div>
+            
+            <div id="wifi-hint" class="hint">
+                <p>Tips memilih jaringan WiFi yang aman:</p>
+                <ul>
+                    <li>Pilih jaringan dengan enkripsi WPA2 atau WPA3</li>
+                    <li>Hindari jaringan terbuka/tanpa password</li>
+                    <li>Waspada terhadap jaringan dengan nama mencurigakan</li>
+                    <li>Untuk jaringan publik, gunakan VPN</li>
+                    <li>Jangan lakukan transaksi sensitif di jaringan publik</li>
+                </ul>
+            </div>
+            <button class="hint-button" onclick="toggleHint('wifi-hint')">Butuh petunjuk?</button>
+            
+            <div id="wifi-message" class="message"></div>
+        </div>
+        
+        <div id="scene5" class="scene">
+            <h2>Ruangan 5: Two-Factor Authentication</h2>
+            <img src="https://img.icons8.com/fluency/96/000000/authenticator.png" class="scene-image" alt="Autentikasi dua faktor">
+            <p>Anda hampir keluar! Tetapi pintu terakhir dilindungi oleh autentikasi dua faktor.</p>
+            <p>Kode 6 digit telah dikirim ke perangkat virtual Anda. Masukkan kode berikut: <strong id="2fa-code">123456</strong></p>
+            
+            <div class="terminal">
+                <div class="terminal-input">
+                    <span class="terminal-prompt">Masukkan kode 2FA:</span>
+                    <input type="text" id="2fa-input" maxlength="6" placeholder="000000">
+                </div>
+            </div>
+            
+            <div class="options">
+                <button onclick="check2FACode()">Verifikasi</button>
+            </div>
+            
+            <div id="2fa-hint" class="hint">
+                <p>Autentikasi dua faktor (2FA) menambahkan lapisan keamanan ekstra dengan membutuhkan:</p>
+                <ul>
+                    <li>Sesuatu yang Anda tahu (password)</li>
+                    <li>Sesuatu yang Anda miliki (kode dari perangkat atau aplikasi)</li>
+                </ul>
+                <p>Selalu aktifkan 2FA untuk akun penting Anda!</p>
+            </div>
+            <button class="hint-button" onclick="toggleHint('2fa-hint')">Butuh petunjuk?</button>
+            
+            <div id="2fa-message" class="message"></div>
+        </div>
+        
+        <div id="ending" class="scene">
+            <h2>Selamat!</h2>
+            <img src="https://img.icons8.com/fluency/96/000000/exit-sign.png" class="scene-image" alt="Pintu keluar">
+            <p>Anda berhasil melewati semua tantangan keamanan digital dan keluar dari ruangan virtual!</p>
+            <p>Pengetahuan Anda tentang keamanan digital telah menyelamatkan Anda. Ingatlah prinsip-prinsip ini dalam kehidupan digital sehari-hari.</p>
+            <div class="options">
+                <button onclick="restartGame()">Main Lagi</button>
+            </div>
+        </div>
+        
+        <div class="developer-credit">
+            <p>Dikembangkan oleh: Dr. Arnidah, S.Pd., M.Si.</p>
+        </div>
+    </div>
+
+    <script>
+        // Variabel game
+        let currentScene = 'intro';
+        let inventory = [];
+        let passwordStrongEnough = false;
+        let selectedWifi = null;
+        
+        // Elemen DOM
+        const scenes = document.querySelectorAll('.scene');
+        
+        // Fungsi untuk memulai game
+        function startGame() {
+            showScene('scene1');
+            generate2FACode();
+        }
+        
+        // Fungsi untuk menampilkan scene
+        function showScene(sceneId) {
+            scenes.forEach(scene => {
+                scene.classList.remove('active');
+            });
+            document.getElementById(sceneId).classList.add('active');
+            currentScene = sceneId;
+        }
+        
+        // Fungsi untuk memeriksa kekuatan password
+        function checkPasswordStrength() {
+            const password = document.getElementById('password-input').value;
+            const strengthBar = document.getElementById('password-strength');
+            const unlockButton = document.getElementById('unlock-door');
+            const categories = document.querySelectorAll('.strength-category');
+            
+            let strength = 0;
+            
+            // Kriteria password
+            const hasMinLength = password.length >= 12;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumbers = /\d/.test(password);
+            const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            const hasNoDictionaryWords = !isDictionaryWord(password);
+            
+            // Hitung kekuatan
+            if (hasMinLength) strength += 20;
+            if (hasUpperCase) strength += 20;
+            if (hasLowerCase) strength += 10;
+            if (hasNumbers) strength += 20;
+            if (hasSpecialChars) strength += 20;
+            if (hasNoDictionaryWords) strength += 10;
+            
+            // Batasi maksimal 100
+            strength = Math.min(strength, 100);
+            
+            // Update tampilan
+            strengthBar.style.width = strength + '%';
+            
+            // Update kategori
+            categories.forEach(cat => cat.classList.remove('active'));
+            
+            if (strength < 30) {
+                document.getElementById('weak').classList.add('active');
+            } else if (strength < 60) {
+                document.getElementById('medium').classList.add('active');
+            } else if (strength < 90) {
+                document.getElementById('strong').classList.add('active');
+            } else {
+                document.getElementById('very-strong').classList.add('active');
+            }
+            
+            // Aktifkan tombol jika password cukup kuat
+            passwordStrongEnough = strength >= 80;
+            unlockButton.disabled = !passwordStrongEnough;
+        }
+        
+        // Fungsi bantu untuk memeriksa kata kamus
+        function isDictionaryWord(password) {
+            const commonWords = ['password', '123456', 'qwerty', 'letmein', 'admin', 'welcome'];
+            return commonWords.some(word => password.toLowerCase().includes(word));
+        }
+        
+        // Fungsi untuk menyelesaikan tantangan password
+        function solvePassword() {
+            if (passwordStrongEnough) {
+                showMessage('password-message', 'Pintu terbuka! Password Anda cukup kuat untuk membuka kunci.', 'success');
+                inventory.push('Kunci Digital');
+                setTimeout(() => showScene('scene2'), 2000);
+            } else {
+                showMessage('password-message', 'Password masih terlalu lemah! Pintu tidak terbuka.', 'error');
+            }
+        }
+        
+        // Fungsi untuk memeriksa jawaban phishing
+        function checkPhishingAnswer(selectedAnswers) {
+            const correctAnswers = [1, 3, 4];
+            const isCorrect = JSON.stringify(selectedAnswers.sort()) === JSON.stringify(correctAnswers.sort());
+            
+            if (isCorrect) {
+                showMessage('phishing-message', 'Benar! Anda berhasil mengidentifikasi email phishing.', 'success');
+                inventory.push('Detektor Phishing');
+                setTimeout(() => showScene('scene3'), 2000);
+            } else {
+                showMessage('phishing-message', 'Belum tepat. Beberapa email phishing terlewat.', 'error');
+            }
+        }
+        
+        // Fungsi untuk memeriksa jawaban malware
+        function checkMalwareAnswer(selectedAnswers) {
+            const correctAnswers = [2, 5];
+            const isCorrect = JSON.stringify(selectedAnswers.sort()) === JSON.stringify(correctAnswers.sort());
+            
+            if (isCorrect) {
+                showMessage('malware-message', 'Tepat! File .exe dan .scr dari sumber tidak dikenal bisa berbahaya.', 'success');
+                inventory.push('Scanner Malware');
+                setTimeout(() => showScene('scene4'), 2000);
+            } else {
+                showMessage('malware-message', 'Jawaban belum benar. File executable bisa menyembunyikan malware.', 'error');
+            }
+        }
+        
+        // Fungsi untuk memilih WiFi
+        function selectWifi(element, wifiId) {
+            document.querySelectorAll('.wifi-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedWifi = wifiId;
+            document.getElementById('connect-wifi').disabled = false;
+        }
+        
+        // Fungsi untuk memeriksa jawaban WiFi
+        function checkWifiAnswer() {
+            if (selectedWifi === 'wifi2') {
+                showMessage('wifi-message', 'Pilihan tepat! Jaringan dengan enkripsi WPA2 dan password pribadi paling aman.', 'success');
+                inventory.push('Koneksi Aman');
+                setTimeout(() => showScene('scene5'), 2000);
+            } else {
+                showMessage('wifi-message', 'Jaringan ini tidak aman! Jaringan terbuka atau tanpa enkripsi bisa membahayakan data Anda.', 'error');
+            }
+        }
+        
+        // Fungsi untuk menghasilkan kode 2FA acak
+        function generate2FACode() {
+            const code = Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('2fa-code').textContent = code;
+            return code;
+        }
+        
+        // Fungsi untuk memeriksa kode 2FA
+        function check2FACode() {
+            const enteredCode = document.getElementById('2fa-input').value;
+            const correctCode = document.getElementById('2fa-code').textContent;
+            
+            if (enteredCode === correctCode) {
+                showMessage('2fa-message', 'Kode benar! Autentikasi dua faktor berhasil.', 'success');
+                inventory.push('Token 2FA');
+                setTimeout(() => showScene('ending'), 2000);
+            } else {
+                showMessage('2fa-message', 'Kode salah! Coba lagi.', 'error');
+            }
+        }
+        
+        // Fungsi untuk menampilkan pesan
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'message ' + type;
+        }
+        
+        // Fungsi untuk menampilkan/sembunyikan petunjuk
+        function toggleHint(hintId) {
+            const hint = document.getElementById(hintId);
+            hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // Fungsi untuk memulai ulang game
+        function restartGame() {
+            inventory = [];
+            passwordStrongEnough = false;
+            selectedWifi = null;
+            document.getElementById('password-input').value = '';
+            document.getElementById('password-strength').style.width = '0%';
+            document.querySelectorAll('.strength-category').forEach(cat => cat.classList.remove('active'));
+            document.querySelectorAll('.wifi-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('connect-wifi').disabled = true;
+            document.getElementById('2fa-input').value = '';
+            generate2FACode();
+            showScene('intro');
+        }
+    </script>
+</body>
+</html>
